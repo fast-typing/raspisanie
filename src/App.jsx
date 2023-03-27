@@ -9,6 +9,7 @@ import { fetchAuthMe, selectIsAuth } from "./redux/slices/auth";
 import FullTimeTable from './pages/FullTimeTable'
 import Create from "./pages/Create";
 import Register from './pages/Register'
+import Teachers from './pages/Teachers'
 function App() {
   useEffect(() => {
     dispatch(fetchAuthMe());
@@ -23,6 +24,7 @@ function App() {
         <Route path="/:id" element={<FullTimeTable />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/teachers" element={<Teachers />} />
       </Routes>
     </>
   );

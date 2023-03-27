@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchAuth } from '../redux/slices/auth'
 import { Navigate } from "react-router-dom";
 import { selectIsAuth } from "../redux/slices/auth";
+
 const Login = () => {
   const dispatch = useDispatch();
   const isAuth = useSelector(selectIsAuth);
@@ -33,6 +34,7 @@ const Login = () => {
   }
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
+      <h1>Вход</h1>
       <input {...register("fullName")} />
       <br />
       <br />

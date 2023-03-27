@@ -9,12 +9,13 @@
 
 :root {
   --block-width: 200px;
+  --main-color: #4169E1;
 }
 
 body {
   background-color: #eee;
   margin: 40px auto;
-  width: 1000px;
+  width: 1200px;
 }
 
 header {
@@ -32,8 +33,14 @@ h3 {
   margin-bottom: 5px;
 }
 
+form {
+  margin-top: 50px;
+  text-align: center;
+}
+
 input,
-button {
+button,
+select {
   padding: 10px;
   border-radius: 5px;
   border: none;
@@ -42,7 +49,8 @@ button {
   font-weight: 500;
 }
 
-input {
+input,
+select {
   box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.15);
 }
 
@@ -52,7 +60,7 @@ input:disabled {
 
 button {
   cursor: pointer;
-  background-color: #4169E1;
+  background-color: var(--main-color);
   color: white;
 }
 
@@ -60,8 +68,8 @@ button:disabled {
   background-color: #c2c2c2;
 }
 
-header * {
-  height: fit-content;
+nav a {
+  margin-right: 20px;
 }
 
 .logo {
@@ -115,7 +123,8 @@ header * {
 }
 
 .inputs input,
-.inputs button {
+.inputs button,
+.inputs select {
   margin-bottom: 10px;
 }
 
@@ -130,14 +139,14 @@ header * {
 }
 
 .numbering {
-  position: absolute;
   text-align: right;
-  left: -80px;
-  top: 165px;
+  margin-right: 20px;
+  margin-top: 130px;
 }
 
 .numbering * {
   margin-bottom: 90px;
+  width: max-content;
 }
 
 .create-new-timetable-btn {
@@ -170,7 +179,7 @@ header * {
 
 .tables::-webkit-scrollbar-thumb {
   border-radius: 10px;
-  background-color: #4169E1;
+  background-color: var(--main-color);
 }
 
 .tables::-webkit-scrollbar-track {
@@ -216,12 +225,12 @@ header * {
 }
 
 .date {
-  margin-right: 30px;
+  margin-top: 10px;
 }
 
 .under-btn {
   background-color: transparent;
-  color: #4169E1;
+  color: var(--main-color);
   text-decoration: underline;
 }
 
@@ -243,4 +252,31 @@ header * {
 .event-block * {
   margin-right: 10px;
   vertical-align: middle;
+}
+
+.general-info-container {
+  display: flex;
+  position: relative;
+}
+
+.disabled {
+  display: none;
+}
+
+.overlay {
+  position: absolute;
+  z-index: 999;
+  background-color: rgba(0, 0, 0, 0.05);
+  left: -15px;
+  right: -15px;
+  top: 10px;
+  bottom: -120px;
+  width: auto;
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-size: 28px;
+  font-weight: 900;
 }

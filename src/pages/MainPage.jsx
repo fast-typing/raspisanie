@@ -4,16 +4,19 @@ import axios from "../axios";
 import { NavLink } from "react-router-dom";
 export default function Main() {
   const [data, setDate] = useState();
+
   useEffect(() => {
     axios
       .get("/")
       .then((res) => {
         setDate(res.data);
+        console.log(res.data)
       })
       .catch((err) => {
         console.log(err);
       });
   }, []);
+
   return (
     <main style={{ display: 'flex', flexDirection: "column" }}>
       {data?.map((e) => (

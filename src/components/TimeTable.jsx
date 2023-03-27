@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from "react";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-
-function TimeTable({ setAllLesons, setCount, allLesons }) {
-  const [isFill, setIsFill] = useState(false)
-  const [isCorrect, setIsCorrect] = useState(false)
-  const [isSend, setIsSend] = useState(false)
-  const [isCreating, setIsCreating] = useState(false)
-  const [isMax, setIsMax] = useState(false)
-  const [anyError, setAnyError] = useState(false)
-  const [groupName, setGroupName] = useState("")
-  const [lessons, setLessons] = useState([])
+import axios from "../axios";
+function TimeTable({ setAllLesons, setCount, allLesons, date }) {
+  const [isFill, setIsFill] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [isSend, setIsSend] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isMax, setIsMax] = useState(false);
+  const [anyError, setAnyError] = useState(false);
+  const [groupName, setGroupName] = useState("");
+  const [lessons, setLessons] = useState([]);
+  const [teachers, setTeachers] = useState();
   const [data, setData] = useState({
     title: "",
     teacher: "",
     cabinet: "",
   });
-
   const table = lessons.map((item) => {
     return (
       <div className="lesson">
@@ -26,12 +26,21 @@ function TimeTable({ setAllLesons, setCount, allLesons }) {
 
   function handleChange(event) {
     const { value, name } = event.target;
-    setData((prevData) => {
-      return {
-        ...prevData,
-        [name]: value,
-      };
-    });
+    if (
+      name === "teacher" &&
+      teachers
+        .find((teacher) => teacher.fullName === value)
+        .holidays.includes(date)
+    ) {
+      alert("Учитель в отпуске");
+    } else {
+      setData((prevData) => {
+        return {
+          ...prevData,
+          [name]: value,
+        };
+      });
+    }
   }
 
   function addLesson() {
@@ -64,8 +73,17 @@ function TimeTable({ setAllLesons, setCount, allLesons }) {
   }
 
   function SkipLesson() {
-    setLessons(prevLessons => [...prevLessons, []])
+    setLessons((prevLessons) => [...prevLessons, []]);
   }
+
+  useEffect(() => {
+    axios
+      .get("/teachers/all")
+      .then((res) => {
+        setTeachers(res.data);
+      })
+      .catch((err) => console.log(err));
+  }, [])
 
   useEffect(() => {
     if (
@@ -74,43 +92,44 @@ function TimeTable({ setAllLesons, setCount, allLesons }) {
       data.title.length > 0 &&
       lessons.length < 6
     ) {
-
       if (allLesons.length === 0) {
-        setIsFill(true)
+        setIsFill(true);
       }
 
-      let j = lessons.length
+      let j = lessons.length;
 
       for (let i = 0; i < allLesons.length; i++) {
         if (allLesons[i]?.lessons === undefined) {
-          setIsFill(true)
+          setIsFill(true);
         } else {
-          if (allLesons[i].lessons[j]?.teacher === data.teacher || allLesons[i].lessons[j]?.cabinet === data.cabinet) {
-            setIsFill(false)
-            setAnyError(true)
-            break
+          if (
+            allLesons[i].lessons[j]?.teacher === data.teacher ||
+            allLesons[i].lessons[j]?.cabinet === data.cabinet
+          ) {
+            setIsFill(false);
+            setAnyError(true);
+            break;
           } else {
-            setIsFill(true)
-            setAnyError(false)
+            setIsFill(true);
+            setAnyError(false);
             // errorText.style.display = 'none'
           }
         }
-
       }
     } else {
-      setIsFill(false)
+      setIsFill(false);
     }
 
     if (groupName.length > 0) {
-      setIsCorrect(true)
+      setIsCorrect(true);
     } else {
-      setIsCorrect(false)
+      setIsCorrect(false);
     }
 
     if (lessons.length > 5) {
-      setIsMax(true)
+      setIsMax(true);
     }
-  }, [data, lessons, groupName])
+  }, [data, lessons, groupName]);
 
   return (
     <>
@@ -137,12 +156,11 @@ function TimeTable({ setAllLesons, setCount, allLesons }) {
           </div>
 
           <div className="inputs">
-            {
-              anyError &&
+            {anyError && (
               <div className="error" style={{ marginBottom: 10 }}>
                 Данный учитель или кабинет уже заняты!
               </div>
-            }
+            )}
 
             <input
               type="text"
@@ -151,13 +169,27 @@ function TimeTable({ setAllLesons, setCount, allLesons }) {
               name="title"
               value={data.title}
             />
-            <input
+            {/* <input
               type="text"
               placeholder="Учитель"
               onChange={handleChange}
               name="teacher"
               value={data.teacher}
-            />
+            /> */}
+            <select
+              name="teacher"
+              id=""
+              onChange={handleChange}
+              value={data.teacher}
+            >
+              <option value="" disabled hidden>
+                Учитель
+              </option>
+              {teachers?.map((e) => (
+                <option value={e.fullName}>{e.fullName}</option>
+              ))}
+            </select>
+
             <input
               type="text"
               placeholder="Кабинет"
@@ -167,7 +199,9 @@ function TimeTable({ setAllLesons, setCount, allLesons }) {
             />
 
             <div className="inputs__bottom">
-              <button disabled={isMax} onClick={clearLessons}>Очистить все</button>
+              <button disabled={isMax} onClick={clearLessons}>
+                Очистить все
+              </button>
               <button
                 disabled={!isFill}
                 onClick={() => addLesson()}
@@ -178,8 +212,10 @@ function TimeTable({ setAllLesons, setCount, allLesons }) {
                 <AddRoundedIcon />
               </button>
             </div>
-            
-            <button onClick={SkipLesson} disabled={isMax} className='under-btn'>Пропустить</button>
+
+            <button onClick={SkipLesson} disabled={isMax} className="under-btn">
+              Пропустить
+            </button>
             <button
               onClick={CreateComplete}
               disabled={!isCorrect}
@@ -189,8 +225,6 @@ function TimeTable({ setAllLesons, setCount, allLesons }) {
               Закончить
             </button>
           </div>
-
-
         </div>
       )}
     </>

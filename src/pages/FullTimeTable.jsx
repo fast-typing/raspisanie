@@ -21,7 +21,7 @@ export default function Main() {
     return (
       <div className="table">
         <div className="lessons-of-group">
-          <input type="text" disabled value={item.group} className="group-name"/>
+          <input type="text" disabled value={item.group} className="group-name" />
           {item.lessons.map((lesson) => (
             <div className="lesson">
               {lesson.title} <br /> {lesson.teacher} <br /> {lesson.cabinet}
@@ -39,11 +39,13 @@ export default function Main() {
   return (
     <main>
       <h1>Расписние на {allLesons?.date}</h1>
-      <div className="numbering">
-        {pairs}
+      <div className='general-info-container'>  
+        <div className="numbering"> {pairs} </div>
+        <div className="tables-container">
+          {tables}
+        </div>
       </div>
 
-      <div className="tables-container">{tables}</div>
     </main>
   );
 }
