@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import axios from "../axios";
-function TimeTable({ setAllLesons, setCount, allLesons, date }) {
+
+function TimeTable({ setAllLesons, setCount, allLesons, date, dataEvent }) {
   const [isFill, setIsFill] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [isSend, setIsSend] = useState(false);
@@ -16,23 +17,49 @@ function TimeTable({ setAllLesons, setCount, allLesons, date }) {
     teacher: "",
     cabinet: "",
   });
-  const table = lessons.map((item) => {
+  const [academic, setAcademic] = useState([]);
+  const [groups, setGroups] = useState([]);
+  console.log(groups)
+  const table = lessons.map((item, id) => {
     return (
       <div className="lesson">
-        {item.title} <br /> {item.teacher} <br /> {item.cabinet}
+        {+dataEvent.time - 1 === id ? (
+          <>
+            {dataEvent.name} <br />
+            {dataEvent.cabinet}
+          </>
+        ) : (
+          <>
+            {item.title} <br /> {item.teacher} <br /> {item.cabinet}
+          </>
+        )}
       </div>
     );
   });
 
   function handleChange(event) {
+
     const { value, name } = event.target;
     if (
       name === "teacher" &&
       teachers
         .find((teacher) => teacher.fullName === value)
-        .holidays.includes(date)
+        .holidays.includes(date.toISOString())
     ) {
       alert("Учитель в отпуске");
+    } else if (name == 'title') {
+      const obj = groups.find((e) => e.name == groupName)
+      const hours = obj.academic.find((e) => e.descipline === value).hours
+      if (hours == 0 || hours < 0) {
+        alert('У группы закончалсь нагрузка на ' + value)
+      } else {
+        setData((prevData) => {
+          return {
+            ...prevData,
+            [name]: value,
+          };
+        });
+      }
     } else {
       setData((prevData) => {
         return {
@@ -57,16 +84,15 @@ function TimeTable({ setAllLesons, setCount, allLesons, date }) {
   }
 
   function CreateComplete() {
-    for (let i = lessons.length; i < 6; i++) {
-      setLessons((prevLessons) => [...prevLessons, []]);
+    let fullLessons = lessons;
+    for (let i = fullLessons.length; i < 6; i++) {
+      fullLessons.push({});
     }
-
     const inputBlock = document.querySelectorAll(".inputs");
     inputBlock.forEach((item) => (item.style.display = "none"));
-
     setAllLesons((prevAllLesons) => [
       ...prevAllLesons,
-      { group: groupName, lessons: lessons },
+      { group: groupName, lessons: fullLessons },
     ]);
     setIsSend(true);
     setCount((prevCount) => [...prevCount, ""]);
@@ -83,14 +109,18 @@ function TimeTable({ setAllLesons, setCount, allLesons, date }) {
         setTeachers(res.data);
       })
       .catch((err) => console.log(err));
-  }, [])
+    axios
+      .get("/groups/all")
+      .then((res) => {
+        setGroups(res.data);
+      })
+      .catch((err) => console.log(err));
 
-  useEffect(() => {
     if (
       data.cabinet.length > 0 &&
       data.teacher.length > 0 &&
       data.title.length > 0 &&
-      lessons.length < 6
+      lessons.length < 7
     ) {
       if (allLesons.length === 0) {
         setIsFill(true);
@@ -120,6 +150,12 @@ function TimeTable({ setAllLesons, setCount, allLesons, date }) {
       setIsFill(false);
     }
 
+    if (groupName) {
+      const newAcademic = groups.find(
+        (group) => group.name === groupName
+      ).academic;
+      setAcademic(newAcademic);
+    }
     if (groupName.length > 0) {
       setIsCorrect(true);
     } else {
@@ -144,87 +180,109 @@ function TimeTable({ setAllLesons, setCount, allLesons, date }) {
       ) : (
         <div className="table">
           <div className="lessons-of-group">
-            <input
-              type="text"
-              placeholder="Группа"
-              onChange={(event) => setGroupName(event.target.value)}
+            <select
               name="groupName"
               className="group-name"
+              onChange={(event) => {
+                if (allLesons.find((e) => e.group === event.target.value)) {
+                  alert("Группа уже создана");
+                } else {
+                  setGroupName(event.target.value);
+                }
+              }}
+              value={groupName}
               disabled={isSend}
-            />
-            {table.length ? table : "Расписание пусто"}
-          </div>
-
-          <div className="inputs">
-            {anyError && (
-              <div className="error" style={{ marginBottom: 10 }}>
-                Данный учитель или кабинет уже заняты!
-              </div>
-            )}
-
-            <input
-              type="text"
-              placeholder="Предмет"
-              onChange={handleChange}
-              name="title"
-              value={data.title}
-            />
-            {/* <input
-              type="text"
-              placeholder="Учитель"
-              onChange={handleChange}
-              name="teacher"
-              value={data.teacher}
-            /> */}
-            <select
-              name="teacher"
-              id=""
-              onChange={handleChange}
-              value={data.teacher}
             >
               <option value="" disabled hidden>
-                Учитель
+                Группа
               </option>
-              {teachers?.map((e) => (
-                <option value={e.fullName}>{e.fullName}</option>
+              {groups?.map((e) => (
+                <option value={e.name}>{e.name}</option>
               ))}
             </select>
+            {!groupName && (
+              <span className="error-groupName">Выберите группу</span>
+            )}
+            {table}
+          </div>
 
-            <input
-              type="text"
-              placeholder="Кабинет"
-              onChange={handleChange}
-              name="cabinet"
-              value={data.cabinet}
-            />
+          {groupName && (
+            <div className="inputs">
+              {anyError && (
+                <div className="error" style={{ marginBottom: 10 }}>
+                  Данный учитель или кабинет уже заняты!
+                </div>
+              )}
+              <select
+                name="title"
+                id=""
+                onChange={handleChange}
+                value={data.title}
+              >
+                <option value="" disabled hidden>
+                  Предмет
+                </option>
+                {academic?.map((e) => (
+                  <option value={e.descipline}>{e.descipline}</option>
+                ))}
+              </select>
+              <select
+                name="teacher"
+                id=""
+                onChange={handleChange}
+                value={data.teacher}
+              >
+                <option value="" disabled hidden>
+                  Учитель
+                </option>
+                {teachers?.map((e) => (
+                  // let text = `${e?.fullName?.split(" ")[0]} ${
+                  //   e?.fullName?.split(" ")[1][0]
+                  // }. ${e?.fullName?.split(" ")[2][0]}.`;
+                  <option value={e?.fullName}>{e.fullName}</option>
+                ))}
+              </select>
 
-            <div className="inputs__bottom">
-              <button disabled={isMax} onClick={clearLessons}>
-                Очистить все
+              <input
+                type="text"
+                placeholder="Кабинет"
+                onChange={handleChange}
+                name="cabinet"
+                value={data.cabinet}
+              />
+
+              <div className="inputs__bottom">
+                <button disabled={isMax} onClick={clearLessons}>
+                  Очистить все
+                </button>
+                <button
+                  disabled={!isFill}
+                  onClick={() => addLesson()}
+                  className="plus-btn hint-right"
+                  data-hint="Заполните все поля выше"
+                  id="add"
+                >
+                  <AddRoundedIcon />
+                </button>
+              </div>
+
+              <button
+                onClick={SkipLesson}
+                disabled={isMax}
+                className="under-btn"
+              >
+                Пропустить
               </button>
               <button
-                disabled={!isFill}
-                onClick={() => addLesson()}
-                className="plus-btn hint-right"
-                data-hint="Заполните все поля выше"
-                id="add"
+                onClick={CreateComplete}
+                disabled={!isCorrect}
+                data-hint='Заполните поле "Группа"'
+                className="hint-right"
               >
-                <AddRoundedIcon />
+                Закончить
               </button>
             </div>
-
-            <button onClick={SkipLesson} disabled={isMax} className="under-btn">
-              Пропустить
-            </button>
-            <button
-              onClick={CreateComplete}
-              disabled={!isCorrect}
-              data-hint='Заполните поле "Группа"'
-              className="hint-right"
-            >
-              Закончить
-            </button>
-          </div>
+          )}
         </div>
       )}
     </>

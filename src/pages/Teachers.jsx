@@ -5,32 +5,28 @@ import { Button } from "@mui/material";
 
 const Teachers = () => {
   const [data, setData] = useState();
-  const [teacher, setTeacher] = useState();
+  const [teacher, setTeacher] = useState("");
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/teachers/all")
+      .get("/teachers/all")
       .then((res) => {
         setData(res.data);
       })
       .catch((err) => console.log(err));
   }, []);
-
   const addTeacher = () => {
     axios
       .post("/teacher/create", {
         fullName: teacher,
       })
       .then(() => {
-        axios
-          .get("http://localhost:3000/teachers/all")
-          .then((res) => {
-            setData(res.data);
-          })
-          .catch((err) => console.log(err));
-      });
+        axios.get("teachers/all").then((res) => {
+          setData(res.data);
+        });
+      })
+      .catch((err) => alert(err.response.data.message));
   };
-
   const deleteTeacher = (id) => {
     axios.delete(`/teacher/${id}`).then(() => {
       axios
@@ -43,17 +39,19 @@ const Teachers = () => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", marginTop: 10 }}>
-      <input
-        type="text"
-        value={teacher}
-        onChange={(e) => setTeacher(e.target.value)}
-      />
-      <button onClick={addTeacher}>Добавить учителя</button>
-      {data?.map((e) => (
-        <Teacher obj={e} remove={deleteTeacher} />
-      ))}
-    </div>
+    <main>
+      <div className="teachers-add-block">
+        <input value={teacher} onChange={(e) => setTeacher(e.target.value)} />
+
+        <button onClick={addTeacher}>Добавить учителя</button>
+      </div>
+
+      <div className="teachers-container">
+        {data?.map((e) => (
+          <Teacher obj={e} remove={deleteTeacher} />
+        ))}
+      </div>
+    </main>
   );
 };
 
@@ -61,14 +59,12 @@ const Teacher = ({ obj, remove }) => {
   const [isHolday, setIsHoliday] = useState(() => {
     return obj.holidays.length ? true : false;
   });
-
   const [startHoliday, setStartHoliday] = useState(() => {
     return (
       obj.holidays.length &&
       obj.holidays[0].slice(0, obj.holidays[0].indexOf("T"))
     );
   });
-
   const [endHoliday, setEndHoliday] = useState(() => {
     return (
       obj.holidays.length &&
@@ -78,7 +74,6 @@ const Teacher = ({ obj, remove }) => {
       )
     );
   });
-
   function dateRange(start, end) {
     let range = [];
     start = new Date(start);
@@ -89,35 +84,31 @@ const Teacher = ({ obj, remove }) => {
     }
     return range;
   }
-
   const handleClick = () => {
     const holidays = dateRange(startHoliday, endHoliday);
     axios.patch(`/teacher/${obj._id}`, {
       holidays: holidays,
     });
   };
-
   const handleClickDeprive = () => {
     const holidays = dateRange(startHoliday, endHoliday);
     axios.patch(`/teacher/${obj._id}`, {
       holidays: [],
     });
   };
-  
   return (
-    <div>
-      <div style={{ display: "flex" }}>
-        <span>{obj.fullName}</span>
-        <DeleteIcon onClick={() => remove(obj._id)} />
-        <Button
-          onClick={() => {
-            setIsHoliday(!isHolday);
-            handleClickDeprive();
-          }}
-        >
-          {isHolday ? <>Лешить отпуска</> : <>Отправить в отпуск</>}
-        </Button>
-      </div>
+    <div className="teacher-block w-bl">
+      <span>{obj.fullName}</span>
+      <DeleteIcon onClick={() => remove(obj._id)} />
+      <button
+        className="under-btn"
+        onClick={() => {
+          setIsHoliday(!isHolday);
+          handleClickDeprive();
+        }}
+      >
+        {isHolday ? <>Лишить отпуска</> : <>Отправить в отпуск</>}
+      </button>
       {isHolday && (
         <>
           <input
@@ -133,8 +124,9 @@ const Teacher = ({ obj, remove }) => {
             id=""
             value={endHoliday}
             onChange={(e) => setEndHoliday(e.target.value)}
+            style={{ marginLeft: 10, marginRight: 10 }}
           />
-          <Button onClick={handleClick}>Сохранить</Button>
+          <button onClick={handleClick}>Сохранить</button>
         </>
       )}
     </div>

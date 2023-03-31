@@ -2,22 +2,6 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { logout, selectIsAuth } from "../redux/slices/auth";
 import { NavLink } from "react-router-dom";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import Button from '@mui/material/Button';
-import HomeIcon from '@mui/icons-material/HomeRounded';
-import CreateIcon from '@mui/icons-material/AddCircleOutlineRounded';
-import GroupsIcon from '@mui/icons-material/Groups2Rounded';
-import LogoutIcon from '@mui/icons-material/LogoutRounded';
-import LoginIcon from '@mui/icons-material/LoginRounded';
-
-const theme = createTheme({
-  palette: {
-    main: {
-      main: '#4169E1',
-      contrastText: '#fff',
-    },
-  },
-});
 
 export default function Header() {
   const userData = useSelector((state) => state.auth.data);
@@ -29,44 +13,51 @@ export default function Header() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <header>
-        <img src="img/logo.png" alt="" className="logo" />
+    <header>
+      <img src="img/logo.png" alt="" className="logo" />
 
-        <nav>
-          <NavLink to="/">
-            <Button variant="contained" color='main'>Главная</Button>
-          </NavLink>
+      <nav>
+        <NavLink to="/">
+          <button>Главная</button>
+        </NavLink>
+        {userData?.admin && (
+          <>
+            <NavLink to="/create">
+              <button>Создать</button>
+            </NavLink>
+            <NavLink to="/teachers">
+              <button>Преподователи</button>
+            </NavLink>
+            <NavLink to="/groups">
+              <button>Группы</button>
+            </NavLink>
+          </>
+        )}
 
-          {userData?.teacher && (
-            <>
-              <NavLink to="/create">
-                <Button variant="contained" color='main'> Создать </Button>
-              </NavLink>
-              <NavLink to="/teachers">
-                <Button variant="contained" color='main'> Преподователи </Button>
-              </NavLink>
-            </>
-          )}
-
-          {isAuth ? (
-            <Button variant="contained" color='main'
-              onClick={onClickLogout}
-            >
+        {isAuth ? (
+          <>
+            <NavLink to="/profile">
+              <button>Профиль</button>
+            </NavLink>
+            <button onClick={onClickLogout}>
               Выйти
-            </Button>
-          ) : (
-            <>
-              <NavLink to="/login">
-                <Button variant="contained" color='main'> Войти </Button>
-              </NavLink>
-              <NavLink to="/register">
-                <Button variant="contained" color='main'> Регестрация </Button>
-              </NavLink>
-            </>
-          )}
-        </nav>
-      </header>
-    </ThemeProvider>
+            </button>
+          </>
+        ) : (
+          <>
+            <NavLink to="/login">
+              <button>
+                Войти
+              </button>
+            </NavLink>
+            <NavLink to="/register">
+              <button>
+                Регистрация
+              </button>
+            </NavLink>
+          </>
+        )}
+      </nav>
+    </header>
   );
 }

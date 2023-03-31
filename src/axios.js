@@ -1,6 +1,8 @@
 import axios from "axios";
 const instance = axios.create({
-  baseURL: "https://timetable-backend-production.up.railway.app/",
+  baseURL: "http://localhost:3000/",
+    //https://timetable-backend-production.up.railway.app/
+  //http://localhost:3000/
 });
 
 instance.interceptors.request.use((config) => {

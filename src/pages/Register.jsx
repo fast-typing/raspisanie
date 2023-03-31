@@ -22,7 +22,7 @@ const Login = () => {
   const onSubmit = async (values) => {
     const data = await dispatch(fetchRegister(values));
     if (!data.payload) {
-      return alert("Не удалось зарегистрироваться");
+      return alert("Не удалось зарегестрироваться");
     }
     if ("token" in data.payload) {
       window.localStorage.setItem("token", data.payload.token);
@@ -33,14 +33,14 @@ const Login = () => {
   }
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <h1>Регистрация</h1>
+      <h1 className="title">Регистрация</h1>
       <input {...register("fullName")} />
       <br />
       <br />
       <input {...register("password", { required: true })} />
       <br />
       <br />
-      <input type="submit" />
+      <button type="submit"> Отправить </button>
     </form>
   );
 };
